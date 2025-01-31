@@ -1,0 +1,21 @@
+name: Check PR Title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  check-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR title
+        run: |
+          PR_TITLE=$(curl -s https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${GITHUB_REF##*/} | jq -r '.title')
+          
+          # Define the regex pattern for the PR title (e.g., "JIRA-6785")
+          if [[ ! "$PR_TITLE" =~ ^JIRA-[0-9]+$ ]]; then
+            echo "Error: PR title must be in the format 'JIRA-<ticket_number>', e.g., 'JIRA-6785'."
+            exit 1
+          fi
+
+          echo "PR title is valid: $PR_TITLE"
